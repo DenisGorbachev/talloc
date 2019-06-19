@@ -46,7 +46,7 @@ describe 'Cake factory', ->
 
     Tasks = db.collection('Tasks');
     tasks = await Tasks.find().toArray()
-    expect(tasks).to.deep.equal([
+    expect(tasks).toBe([
       {type: 'SplitArtefact', context: {type: 'Flour', 500}}
       {type: 'SplitArtefact', context: {type: 'Eggs', 5}}
       {type: 'SplitArtefact', context: {type: 'Water', 1000}}
@@ -58,7 +58,7 @@ describe 'Cake factory', ->
 
     Tasks = db.collection('Tasks');
     tasks = await Tasks.find().toArray()
-    expect(tasks).to.deep.equal([
+    expect(tasks).toBe([
       {type: 'BakeCake'}
     ])
 
@@ -75,7 +75,7 @@ describe 'Cake factory', ->
 
     Tasks = db.collection('Tasks');
     tasks = await Tasks.find().toArray()
-    expect(tasks).to.deep.equal([
+    expect(tasks).toBe([
       {type: 'FetchFlour', context: {amount: 500}}
     ])
 
