@@ -1,11 +1,11 @@
 module.exports = function (wallaby) {
   return {
     files: [
-      'lib/**/*.js'
+      'lib/**/*.coffee'
     ],
 
     tests: [
-      'test/**/*.test.js'
+      'test/**/*.test.coffee'
     ],
 
     testFramework: 'jest',
