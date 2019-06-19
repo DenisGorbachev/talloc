@@ -1,0 +1,11 @@
+*.iml
+.idea
+.DS_Store
+node_modules
+
+# hide secret configuration files
+config/*.secret.json
+config/*.local.json
+
+# for local development
+docker-compose.yml
