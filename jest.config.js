@@ -1,7 +1,11 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
-module.exports = {
+const _ = require('lodash');
+const jest_coffeescript_preset = require('jest-preset-coffeescript/jest-preset');
+const jest_mongodb_preset = require('@shelf/jest-mongodb/jest-preset');
+
+module.exports = _.merge({}, jest_coffeescript_preset, jest_mongodb_preset, {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
@@ -88,7 +92,7 @@ module.exports = {
   // notifyMode: "failure-change",
 
   // A preset that is used as a base for Jest's configuration
-  preset: "jest-preset-coffeescript",
+  // preset: "jest-preset-coffeescript",
 
   // Run tests from one or more projects
   // projects: null,
@@ -129,7 +133,7 @@ module.exports = {
   // snapshotSerializers: [],
 
   // The test environment that will be used for testing
-  testEnvironment: "node",
+  // testEnvironment: "node",
 
   // Options that will be passed to the testEnvironment
   // testEnvironmentOptions: {},
@@ -182,4 +186,4 @@ module.exports = {
 
   // Whether to use watchman for file crawling
   // watchman: true,
-};
+});

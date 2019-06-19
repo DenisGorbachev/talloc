@@ -6,11 +6,14 @@
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
+    "@shelf/jest-mongodb": "^1.0.1",
     "babel-jest": "^24.8.0",
     "jest": "^24.8.0",
     "jest-preset-coffeescript": "^1.0.1"
   },
   "dependencies": {
-    "coffeescript": "^2.4.1"
+    "coffeescript": "^2.4.1",
+    "lodash": "^4.17.11",
+    "mongodb": "^3.2.7"
   }
 }
