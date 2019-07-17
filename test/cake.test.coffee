@@ -22,9 +22,9 @@ describe 'Cake factory', ->
 
     # tick is in milliseconds
     tick: 0
-    
+
     now: -> new Date(@tick)
-    
+
     run: (collection, selector, options) ->
       result = await @fetch(collection, selector, options)
       if result
@@ -37,25 +37,25 @@ describe 'Cake factory', ->
           @materialize(plan)
         else
           throw new Error("Can\'t find a plan for #{JSON.stringify({collection, selector, options})}")
-    
+
     fetch: (collection, selector, options) ->
       result = await db[collection].find(selector, options).toArray()
       # check results' lower bound (aka lower limit, aka min count)
       if options.bound && result.length < options.bound
         return null
       result
-    
+
     plan: (collection, selector, options) ->
       for functor in @functors
-        functor.plan(collection, selector, options)
-    
+        await functor.plan(collection, selector, options)
+
     estimate: (plan) ->
       # TODO: sum durations of dependencies
       plan.duration
-    
+
     materialize: (plan) ->
       console.log('plan', plan);
-    
+
     simulate: ->
       while (operations = db.Operations.find({finishedAt: null}).toArray()).length
         @tick += 1000
@@ -78,7 +78,10 @@ describe 'Cake factory', ->
     plan: (collection, selector, options) ->
       switch collection
         when 'Artefacts'
-          Object.assign({name: @name}, @blueprint)
+          if selector.type && selector.amount
+            srcArtefact = await db.Artefacts.findOne({type: selector.type, amount: {$gt: selector.amount}})
+            if srcArtefact
+              Object.assign({name: @name}, @blueprint, {context: {artefactId: srcArtefact._id}})
 
     execute: (operation) ->
       if System.now() - operation.startedAt.getTime() > @blueprint.duration
