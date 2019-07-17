@@ -12,6 +12,7 @@
     "jest-preset-coffeescript": "^1.0.1"
   },
   "dependencies": {
+    "@hapi/joi": "^15.1.0",
     "coffeescript": "^2.4.1",
     "lodash": "^4.17.11",
     "moment": "^2.24.0",

@@ -6,6 +6,7 @@ node_modules
 # hide secret configuration files
 config/*.secret.json
 config/*.local.json
+*.local.js
 
 # for local development
 docker-compose.yml

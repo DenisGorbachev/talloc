@@ -1,3 +1,5 @@
+console.log('new Date()', new Date());
+
 module.exports = function (wallaby) {
   return {
     files: [
@@ -15,6 +17,7 @@ module.exports = function (wallaby) {
     },
 
     compilers: {
+     '**/*.coffee': wallaby.compilers.coffeeScript({}),
       '**/*.js': wallaby.compilers.babel()
     }
   };

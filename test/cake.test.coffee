@@ -3,6 +3,11 @@ moment = require('moment')
 {MongoClient} = require('mongodb')
 
 describe 'Cake factory', ->
+  it 'temp', ->
+  return undefined
+
+###
+describe 'Cake factory', ->
   connection = null
   db = null
 
@@ -187,3 +192,4 @@ describe 'Cake factory', ->
 
   # Jest requires `describe` callback not to return any value
   return undefined
+###
