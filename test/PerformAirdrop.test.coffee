@@ -22,16 +22,17 @@ describe 'PerformAirdrop', ->
 
   it 'should return the task for denis.d.gorbachev@gmail.com', ->
     await db.Assets.insert(
-      symbol: 'BTCV',
+      uid: 'BTCV',
       maxSupply: 100000000,
       circulatingSupply: 9117300,
       # price in USD
       price: 0.03
     )
     functor = new PerformAirdrop({
-      project: 'BTCV',
-      asset: 'BTCV',
+      projectUid: 'BTCV',
+      assetUid: 'BTCV',
       amount: 10000,
+      limit: 1000,
       networks: ['Twitter', 'Facebook', 'Telegram', 'Discord']
     }, {db})
     await functor.execute()
@@ -44,5 +45,5 @@ describe 'PerformAirdrop', ->
       }
     ])
 
-  # Jest requires `describe` callback not to return any value
+  # Jest requires `describe` callback to return undefined
   return undefined

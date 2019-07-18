@@ -70,7 +70,7 @@ export default class PerformAirdrop extends Functor
     channels
   ensureToken: ->
     transactions = await @db.Transactions.find({asset: @asset}).toArray()
-    sum = _.sumBy(transactions, (transaction) -> transaction.isIncoming ? transaction.amount : -transaction.amount);
+    sum = _.sumBy(transactions, (transaction) -> if transaction.isIncoming then transaction.amount else -1 * transaction.amount);
   buildMessageForAirdropRecipients: (project, asset) ->
     """
       #{project.description}

@@ -190,6 +190,6 @@ describe 'Cake factory', ->
       {type: 'FetchFlour', context: {amount: 500}}
     ])
 
-  # Jest requires `describe` callback not to return any value
+  # Jest requires `describe` callback to return undefined
   return undefined
 ###
