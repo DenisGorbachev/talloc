@@ -15,13 +15,14 @@ describe 'PerformAirdrop', ->
     db.Channels = db.collection('Channels')
     db.Artefacts = db.collection('Artefacts')
     db.Assets = db.collection('Assets')
+    db.Transactions = db.collection('Transactions')
 
   afterAll ->
     await connection.close()
     await db.close()
 
   it 'should return the task for denis.d.gorbachev@gmail.com', ->
-    await db.Assets.insert(
+    await db.Assets.insertOne(
       uid: 'BTCV',
       maxSupply: 100000000,
       circulatingSupply: 9117300,
@@ -30,10 +31,13 @@ describe 'PerformAirdrop', ->
     )
     functor = new PerformAirdrop({
       projectUid: 'BTCV',
-      assetUid: 'BTCV',
+      networks: ['Twitter', 'Facebook', 'Telegram', 'Discord']
+      assetUid: 'MOON',
       amount: 10000,
       limit: 1000,
-      networks: ['Twitter', 'Facebook', 'Telegram', 'Discord']
+      from: new Date('2019-07-22'),
+      to: new Date('2019-07-31'),
+      referralLimit: 100,
     }, {db})
     await functor.execute()
     expect(functor.tasks).toBe([

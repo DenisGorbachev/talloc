@@ -38,6 +38,8 @@ export default class PerformAirdrop extends Functor
     spec = await @ensureSpec()
     channels = await @ensureChannels()
     token = await @ensureToken()
+    app = await @ensureApp()
+    @addText('Implement the ')
     @addText('Determine token amount for airdrop')
     @addText('Evaluate https://gleam.io/ as potential platform')
     @addText('Evaluate whether 10:1 entry:token conversion is necessary')
@@ -71,11 +73,18 @@ export default class PerformAirdrop extends Functor
   ensureToken: ->
     transactions = await @db.Transactions.find({asset: @asset}).toArray()
     sum = _.sumBy(transactions, (transaction) -> if transaction.isIncoming then transaction.amount else -1 * transaction.amount);
+  ensureApp: ->
+    app = await @db.Artefacts.findOne({tags: {$all: ['Airdrop', 'App']}})
+    app.context.networks
+    if !app
+      @add('Execute',
+        text: """[Implement airdrop application](https://workflowy.com/#/17112ae471fc)"""
+      )
   buildMessageForAirdropRecipients: (project, asset) ->
     """
       #{project.description}
 
-      #{project.name} is airdropping free #{@asset.uid} tokens to their community members. Sign up at their airdrop page, complete easy tasks and submit your details to the airdrop page to receive free entries. Also, earn up to #{@referralLimit} entries by inviting your friends. Entries will be converted to #{@asset.uid} token in the ratio of 10:1. The airdrop ends at #{@to}.
+      #{project.name} is airdropping free #{asset.uid} tokens to their community members. Sign up at their airdrop page, complete easy tasks and submit your details to the airdrop page to receive free entries. Also, earn up to #{@referralLimit} entries by inviting your friends. Entries will be converted to #{asset.uid} token in the ratio of 10:1. The airdrop ends at #{@to}.
     """
   sendMessagesToAirdropFeeds: ->
     channels = await @db.Channels.find({tags: 'Airdrop'}).toArray()
