@@ -2,10 +2,10 @@ fs = require('fs');
 _ = require('lodash');
 
 let localConfig = {};
-const localConfigFilename = __dirname + '/jest-mongodb-config.local.js';
-if (fs.existsSync(localConfigFilename)) {
-  localConfig = require(localConfigFilename);
-}
+// const localConfigFilename = __dirname + '/jest-mongodb-config.local.js';
+// if (fs.existsSync(localConfigFilename)) {
+//   localConfig = require(localConfigFilename);
+// }
 
 module.exports = _.merge({
   mongodbMemoryServerOptions: {

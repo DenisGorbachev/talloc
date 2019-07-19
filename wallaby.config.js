@@ -1,7 +1,8 @@
 const _ = require('lodash');
 const fs = require('fs');
+const babelConfig = require('./babel.config');
 
-ifExists = function(filename) {
+ifExists = function (filename) {
   return fs.existsSync(filename) && filename;
 };
 
@@ -34,7 +35,9 @@ module.exports = function (wallaby) {
     },
 
     compilers: {
-      // '**/*.coffee': wallaby.compilers.coffeeScript({}),
+      '**/*.coffee': wallaby.compilers.coffeeScript({
+        transpile: babelConfig
+      }),
       // '**/*.js': wallaby.compilers.babel()
     }
   };
