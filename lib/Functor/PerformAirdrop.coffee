@@ -5,16 +5,6 @@ import Functor from '../Functor'
 #import GetIncomingTransaction from './GetIncomingTransaction'
 
 ###
-  * Inputs
-    * Channels
-      * Each
-        * Is decorated
-        * Has posts
-      * All
-        * Are related to the same project
-    * Token
-      * Has use case
-      * + Has existing market
   * Outputs
     * Channels with higher follower count
     * Persons
@@ -67,6 +57,17 @@ export default class PerformAirdrop extends Functor
           blueprint:
             network: network,
             tags: [@projectUid]
+        )
+    for channel in channels
+      if !channel.isDecorated
+        @add('DecorateChannel',
+          channel: channel
+        )
+      messagesCount = await @db.Messages.find({channelId: channel._id}).count()
+      if messagesCount < 5
+        @add('SendMessage',
+          blueprint:
+            channelId: channel._id
         )
     channels
   ensureToken: ->

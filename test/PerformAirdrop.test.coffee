@@ -40,14 +40,15 @@ describe 'PerformAirdrop', ->
       referralLimit: 100,
     }, {db})
     await functor.execute()
-    expect(functor.tasks).toBe([
-      {
-        type: 'CreateChannel',
-        context:
-          blueprint:
-            network: 'Telegram'
-      }
-    ])
+    expect(_.first(functor.tasks)).toStrictEqual(
+      type: 'CreateChannel',
+      context:
+        blueprint:
+          network: 'Twitter'
+          tags: ['BTCV']
+      priority: 10,
+      genome: []
+    )
 
   # Jest requires `describe` callback to return undefined
   return undefined
