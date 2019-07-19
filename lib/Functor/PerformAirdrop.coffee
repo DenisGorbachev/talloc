@@ -39,7 +39,6 @@ export default class PerformAirdrop extends Functor
     channels = await @ensureChannels()
     token = await @ensureToken()
     app = await @ensureApp()
-    @addText('Implement the ')
     @addText('Determine token amount for airdrop')
     @addText('Evaluate https://gleam.io/ as potential platform')
     @addText('Evaluate whether 10:1 entry:token conversion is necessary')
@@ -75,7 +74,6 @@ export default class PerformAirdrop extends Functor
     sum = _.sumBy(transactions, (transaction) -> if transaction.isIncoming then transaction.amount else -1 * transaction.amount);
   ensureApp: ->
     app = await @db.Artefacts.findOne({tags: {$all: ['Airdrop', 'App']}})
-    app.context.networks
     if !app
       @add('Execute',
         text: """[Implement airdrop application](https://workflowy.com/#/17112ae471fc)"""
