@@ -45,6 +45,9 @@ export default class Functor
   execute: (collection, query, options = {}) ->
     # return results, leave @tasks on object
     throw new Error("Implement me")
+  reexecute: ->
+    @tasks = []
+    @execute()
   requestToBlueprint: (query, options) ->
     blueprint = {}
     for key, value of query
