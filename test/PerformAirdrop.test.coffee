@@ -33,13 +33,29 @@ describe 'PerformAirdrop', ->
       to: new Date('2019-07-31'),
       referralLimit: 100,
     }, { db })
+    await db.Projects.insertOne(
+      uid: 'BTCV',
+      url: 'https://btcv.volatility-tokens.com/',
+    )
     await db.Assets.insertOne(
       uid: 'BTCV',
       maxSupply: 100000000,
       circulatingSupply: 9117300,
-# price in USD
-      price: 0.03
+      initialOfferingPrice: 0.03 # USD
     )
+    await db.Assets.insertOne(
+      uid: 'MOON',
+      maxSupply: 10000000000,
+      circulatingSupply: 10000000000,
+      initialOfferingPrice: 0.001 # USD
+    )
+#    await functor.reexecute()
+#    expect(_.first(functor.tasks)).toMatchObject(
+#      type: 'SetField',
+#      context: {}
+#      priority: 10,
+#      genome: []
+#    )
     await functor.reexecute()
     expect(_.first(functor.tasks)).toMatchObject(
       type: 'CreateChannel',
@@ -77,6 +93,20 @@ describe 'PerformAirdrop', ->
       priority: 10,
       genome: []
     )
+#    for channelId in channelIds
+#      messages =
+#        for i in [1..5]
+#          {
+#            channelId: channelId,
+#            text: "Message for channel #{channelId} with index #{i}",
+#            author: "@Author",
+#            context: {}
+#          }
+#      await db.Messages.insertMany(messages)
+#    await functor.reexecute()
+#    expect(_.first(functor.tasks)).toMatchObject(
+#
+#    )
 
   # Jest requires `describe` callback to return undefined
   return undefined

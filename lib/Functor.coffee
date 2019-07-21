@@ -7,9 +7,11 @@ export default class Functor
     _.extend(@, Joi.attempt(deps, Joi.object()))
     @tasks = []
   add: (type, context, priority = 10) ->
-    @tasks.push({ type, context, priority, genome: [] })
-  addText: (text, priority = 100) ->
-    @tasks.push({ type: 'Execute', context: {text}, priority, genome: [] })
+    task = { type, context, priority, genome: [] }
+    @tasks.push(task)
+    task
+  addText: (text, context, priority = 100) ->
+    @add('Execute', Object.assign({ text }, context), priority)
   assign: (genome) ->
     for task in @tasks
       task.genome = task.genome.concat(genome)
@@ -32,7 +34,11 @@ export default class Functor
         functor = new functorClass()
         time = functor.estimate(collection, query, options)
         { functor, time }
-    if !functors.length then throw new Error("Can't find functor for #{JSON.stringify({ collection, query, options }, 2)}")
+    if !functors.length then throw new Error("Can't find functor for #{JSON.stringify({
+      collection,
+      query,
+      options
+    }, 2)}")
     { functor, time } = _.minBy(functors, 'time')
     results = functor.execute(collection, query, options)
     @tasks = @tasks.concat(functor.tasks)
@@ -40,10 +46,10 @@ export default class Functor
   find: (collection, query, options = {}) ->
     throw new Error("Replace with #{collection}.find()")
   estimate: (collection, query, options = {}) ->
-    # return time
+# return time
     throw new Error("Implement me")
   execute: (collection, query, options = {}) ->
-    # return results, leave @tasks on object
+# return results, leave @tasks on object
     throw new Error("Implement me")
   reexecute: ->
     @tasks = []
