@@ -18,7 +18,6 @@ export default class PerformAirdrop extends Functor
       projectUid: Joi.string().required(),
       networks: Joi.array().default(['Twitter', 'Facebook', 'Telegram', 'Discord']).items(Joi.string().required()).required(),
       assetUid: Joi.string().required(),
-      amount: Joi.number(### per single claim ###).required(),
       limit: Joi.number(### max count of claims ###).required(),
       from: Joi.date(### airdrop start ###).required(),
       to: Joi.date(### airdrop end ###).required(),
@@ -35,11 +34,10 @@ export default class PerformAirdrop extends Functor
     app = await @ensureApp()
     @addText('Upvote on each airdrop channel that supports it')
     @addText('Implement account-less upvoting on airdrops.io')
-    # TODO: check that all inputs are present
     # TODO: sign agreements with airdrop announcement channels
     # TODO: ping them again if they don't respond
-    message = @buildMessageForAirdropRecipients(project, asset)
-    @sendMessagesToAirdropFeeds(project, asset)
+    message = await @buildMessageForAirdropRecipients(project, asset)
+    await @sendMessagesToAirdropFeeds(project, asset, amount)
   calculateAmount: (asset) ->
     # minimum value to get the bounty hunters interested (current range as of 2019-07-21 is 1-10 USD)
     value = 5.0 # USD
@@ -84,8 +82,11 @@ export default class PerformAirdrop extends Functor
     # @addText('Evaluate https://gleam.io/ as potential platform')
     app = await @db.Artefacts.findOne({ tags: { $all: ['Airdrop', 'App'] } })
     if !app
-      @add('Execute',
-        text: """[Implement airdrop application](https://workflowy.com/#/17112ae471fc)"""
+      @add('CreateArtefact',
+        blueprint:
+          name: 'Airdrop application',
+          tags: []
+        description: 'https://workflowy.com/#/17112ae471fc'
       )
   buildMessageForAirdropRecipients: (project, asset) ->
     """
@@ -93,12 +94,12 @@ export default class PerformAirdrop extends Functor
 
       #{project.name} is airdropping free #{asset.uid} tokens to their community members. Sign up at their airdrop page, complete easy tasks and submit your details to the airdrop page to receive free entries. Also, earn up to #{@referralLimit} entries by inviting your friends. Entries will be converted to #{asset.uid} token in the ratio of 10:1. The airdrop ends at #{@to}.
     """
-  sendMessagesToAirdropFeeds: (project, asset) ->
+  sendMessagesToAirdropFeeds: (project, asset, amount) ->
     # TODO: convert Markdown message into HTML for channels that support email
     channels = await @db.Channels.find({ tags: 'Airdrop' }).toArray()
     for channel in channels
-      information = "Hi, we're launching an airdrop for #{project.name} (#{project.url})"
-      motivation = ""
+      information = "Hi, we're launching an airdrop for #{project.name}"
+      motivation = "Looking forward to the day when bounty hunters tell their friends that they got #{asset.uid} airdrop on #{channel.name} ;)"
       action = (
         switch channel.network
           when "Website"
@@ -107,12 +108,72 @@ export default class PerformAirdrop extends Functor
             "post it on #{channel.name}"
       )
       guide = "could you please #{action}"
+      fears = [
+        'Fears losing reputation among bounty hunters for listing low-value airdrops (status)'
+        'Fears losing reputation among bounty hunters for listing scam projects (status)'
+      ]
+      assurances = [
+        {
+          text: "#{@assetUid} is already listed on Voltex (https://exchange.volatility-tokens.com/)"
+          fears: ['Fears losing reputation among bounty hunters for listing low-value airdrops (status)']
+        }
+        {
+          text: "#{project.name} code is already available on GitHub: $link"
+          fears: ['Fears losing reputation among bounty hunters for listing scam projects (status)']
+        }
+      ]
+      useCase = "#{asset.uid} provides 30% discount for buying BTCV on Voltex (https://exchange.volatility-tokens.com/)"
       validateSalesMessage(information, motivation, fears, assurances, guide)
-      message = """
+      text = """
       #{information} - #{guide}? Here's a full specification:
 
-      #{}
+      * Website: #{project.url}
+      * Token: #{asset.uid}
+      * Token use case: #{useCase}
+      * Amount for one claim: #{amount} #{asset.uid}
+      * Max claims: #{@limit}
+      * Start date: #{@from}
+      * End date: #{@to}
+
+      Extra information:
+      #{toMarkdownList(_.map(assurances, 'text'))}
+
+      #{motivation}
       """.trim()
-      @addText('Build cadence (if messages were left unanswered)')
-      # NOTE: we have multiple contacts (including website form)
-      # NOTE: we generally don't know how many people are running the show
+      writerPersonIds = _(channel.permissions).filter({ type: 'private', write: true }).map('personIds').flatten().uniq().value()
+      if !writerPersonIds.length
+        # TODO: how to update the task if the channel name changes?
+        @add('CreateChannelOwner',
+          blueprint: {}
+          channel: channel
+        )
+        return
+      writerChannels = await @db.Channels.find(
+        tags: ['Listing']
+        $and: [
+          { permissions: { type: 'public', write: true } }
+          { permissions: { type: 'private', read: true, personIds: { $in: writerPersonIds } } }
+        ]
+      )
+      if !writerChannels.length
+        writers = await @db.Persons.find({ _id: { $in: writerPersonIds } })
+        # TODO: how to update the task if the channel name changes?
+        @add('CreateChannelWithAnyPerson',
+          blueprint: {}
+          persons: writers
+        )
+        return
+      # TODO: should we message everybody in round-robin fashion?
+      # TODO: what if some writers are subscribed to the channels that we've already sent messages through?
+      writerChannel = _.first(writerChannels)
+      message = await @db.Messages.find(
+        channelId: writerChannel._id
+      )
+      if !message
+        @add('SendMessage'
+          blueprint:
+            text: text,
+            channel: writerChannel
+        )
+      if message && message.createdAt < moment().subtract(2, 'days')
+        @addText('Build message cadence')

@@ -15,15 +15,14 @@ export validateSalesMessage = (information, motivation, fears, assurances, guide
   joi.attempt(information, joi.string())
   joi.attempt(motivation, joi.string())
   joi.attempt(fears, joi.array().items(joi.string()))
-  joi.attempt(assurances, joi.object().pattern(/.*/, [joi.string()]))
+  joi.attempt(assurances, joi.array().items(joi.object().keys({text: joi.string(), fears: joi.array().items(joi.string())})))
   joi.attempt(guide, joi.string())
-  assuranceKeys = _.keys(assurances)
-  assuranceValues = _.values(assurances)
   for fear in fears
-    if !fear.matches(fearRegExp)
+    if !fear.match(fearRegExp)
       throw new Error("Fear '#{fear}' should match RegExp #{fearRegExp}")
-  if !_.isEqual(assuranceKeys, fears)
-    throw new Error('Message should relieve the fears of recipient')
+    assurance = _.find(assurances, (assurance) -> fear in assurance.fears)
+    if !assurance
+      throw new Error("Fear '#{fear}' should we relieved by at least one assurance")
 #  """
 #    #{information}
 #
@@ -45,6 +44,7 @@ export validateSalesMessage = (information, motivation, fears, assurances, guide
   Fears losing status
     Fears losing power over subordinates
     Fears losing appreciation of peers
+    Fears losing reputation among clients
   Fears losing time
     Fears losing time on unimportant deeds
     Fears losing time on projects that go nowhere

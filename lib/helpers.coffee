@@ -8,3 +8,9 @@ export display = (tasks, level) ->
     display(task.children, level + 1)
 
 export toMarkdownList = (array) -> array.map((v) -> '* ' + v).join('\n')
+
+export perms = (type, truePermissions, personIds = []) ->
+  permissions = { type, personIds }
+  for permission in ['create', 'read', 'update', 'delete']
+    permissions[permission] = permission in truePermissions or truePermissions is true or truePermissions is 'all'
+  permissions

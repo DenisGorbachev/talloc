@@ -2,6 +2,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { MongoClient } from 'mongodb'
 import PerformAirdrop from '../lib/Functor/PerformAirdrop'
+import { perms } from '../lib/helpers'
 
 describe 'PerformAirdrop', ->
   connection = null
@@ -11,6 +12,7 @@ describe 'PerformAirdrop', ->
     connection = await MongoClient.connect(global.__MONGO_URI__, { useNewUrlParser: true })
     db = await connection.db(global.__MONGO_DB_NAME__)
     db.Users = db.collection('Users')
+    db.Persons = db.collection('Persons')
     db.Projects = db.collection('Projects')
     db.Channels = db.collection('Channels')
     db.Messages = db.collection('Messages')
@@ -27,7 +29,6 @@ describe 'PerformAirdrop', ->
       projectUid: 'BTCV',
       networks: ['Twitter', 'Facebook', 'Telegram', 'Discord']
       assetUid: 'MOON',
-      amount: 10000,
       limit: 1000,
       from: new Date('2019-07-22'),
       to: new Date('2019-07-31'),
@@ -49,13 +50,59 @@ describe 'PerformAirdrop', ->
       circulatingSupply: 10000000000,
       initialOfferingPrice: 0.001 # USD
     )
-#    await functor.reexecute()
-#    expect(_.first(functor.tasks)).toMatchObject(
-#      type: 'SetField',
-#      context: {}
-#      priority: 10,
-#      genome: []
-#    )
+    #    await functor.reexecute()
+    #    expect(_.first(functor.tasks)).toMatchObject(
+    #      type: 'SetField',
+    #      context: {}
+    #      priority: 10,
+    #      genome: []
+    #    )
+    {
+      insertedId: airdropsIOOwnerId
+    } = await db.Persons.insertOne(
+      name: ''
+    )
+    await db.Channels.insertOne(
+      uid: 'airdrops.io'
+      network: 'Internet'
+      name: 'Airdrops.io'
+      tags: ['Airdrop']
+      permissions: [
+        perms('public', ['read'])
+        perms('protected', ['read'])
+        perms('private', 'all', [airdropsIOOwnerId])
+      ]
+    )
+    await db.Channels.insertOne(
+      uid: 'https://airdrops.io/contact/'
+      network: 'Form'
+      name: 'Airdrops.io contact form'
+      tags: ['Listing']
+      permissions: [
+        perms('public', ['create'])
+        perms('private', 'all', [airdropsIOOwnerId])
+      ]
+    )
+    await db.Channels.insertOne(
+      uid: 'mail@airdrops.io'
+      network: 'Email'
+      name: 'Airdrops.io listings email'
+      tags: ['Listing']
+      permissions: [
+        perms('public', ['create'])
+        perms('private', 'all', [airdropsIOOwnerId])
+      ]
+    )
+    await db.Channels.insertOne(
+      uid: 'AirdropsTeam'
+      network: 'Telegram'
+      name: 'Airdrops.io listings Telegram'
+      tags: ['Listing']
+      permissions: [
+        perms('public', ['create'])
+        perms('private', 'all', [airdropsIOOwnerId])
+      ]
+    )
     await functor.reexecute()
     expect(_.first(functor.tasks)).toMatchObject(
       type: 'CreateChannel',
@@ -93,20 +140,24 @@ describe 'PerformAirdrop', ->
       priority: 10,
       genome: []
     )
-#    for channelId in channelIds
-#      messages =
-#        for i in [1..5]
-#          {
-#            channelId: channelId,
-#            text: "Message for channel #{channelId} with index #{i}",
-#            author: "@Author",
-#            context: {}
-#          }
-#      await db.Messages.insertMany(messages)
-#    await functor.reexecute()
-#    expect(_.first(functor.tasks)).toMatchObject(
-#
-#    )
+    for channelId in channelIds
+      messages =
+        for i in [1..5]
+          {
+            channelId: channelId,
+            text: "Message for channel #{channelId} with index #{i}",
+            author: "@Author",
+            context: {}
+          }
+      await db.Messages.insertMany(messages)
+    await functor.reexecute()
+    expect(_.first(functor.tasks)).toMatchObject(
+      type: 'CreateArtefact',
+      context: { description: 'https://workflowy.com/#/17112ae471fc' },
+      priority: 10,
+      genome: []
+    )
+    # TODO: add tests for messages
 
   # Jest requires `describe` callback to return undefined
   return undefined
