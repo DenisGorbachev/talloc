@@ -35,3 +35,8 @@ export complete = (task, db) ->
     when 'CreateChannelOwner'
       result = await db.Persons.insertOne(task.context.blueprint)
       result.insertedId
+    when 'CreatePrivateChannelWithOwner'
+      result = await db.Persons.insertOne(task.context.blueprint)
+      result.insertedId
+    else
+      throw new Error("Can't complete #{task.type} task")

@@ -75,36 +75,6 @@ describe 'PerformAirdrop', ->
         perms('private', 'all', [airdropsIOOwnerId])
       ]
     )
-    await db.Channels.insertOne(
-      uid: 'https://airdrops.io/contact/'
-      network: 'Form'
-      name: 'Airdrops.io contact form'
-      tags: ['Listing']
-      permissions: [
-        perms('public', ['create'])
-        perms('private', 'all', [airdropsIOOwnerId])
-      ]
-    )
-    await db.Channels.insertOne(
-      uid: 'mail@airdrops.io'
-      network: 'Email'
-      name: 'Airdrops.io listings email'
-      tags: ['Listing']
-      permissions: [
-        perms('public', ['create'])
-        perms('private', 'all', [airdropsIOOwnerId])
-      ]
-    )
-    await db.Channels.insertOne(
-      uid: 'AirdropsTeam'
-      network: 'Telegram'
-      name: 'Airdrops.io listings Telegram'
-      tags: ['Listing']
-      permissions: [
-        perms('public', ['create'])
-        perms('private', 'all', [airdropsIOOwnerId])
-      ]
-    )
 
     task = await functor.getNextTask()
     expect(task).toMatchObject(
@@ -165,6 +135,46 @@ describe 'PerformAirdrop', ->
     task = await functor.getNextTask()
     expect(task).toMatchObject(
       type: 'CreatePrivateChannelWithOwner',
+      context:
+        person:
+          _id: airdropsIOOwnerId
+    )
+    await complete(task, db)
+
+    await db.Channels.insertOne(
+      uid: 'https://airdrops.io/contact/'
+      network: 'Form'
+      name: 'Airdrops.io contact form'
+      tags: ['Listing']
+      permissions: [
+        perms('public', ['create'])
+        perms('private', 'all', [airdropsIOOwnerId])
+      ]
+    )
+    await db.Channels.insertOne(
+      uid: 'mail@airdrops.io'
+      network: 'Email'
+      name: 'Airdrops.io listings email'
+      tags: ['Listing']
+      permissions: [
+        perms('public', ['create'])
+        perms('private', 'all', [airdropsIOOwnerId])
+      ]
+    )
+    await db.Channels.insertOne(
+      uid: 'AirdropsTeam'
+      network: 'Telegram'
+      name: 'Airdrops.io listings Telegram'
+      tags: ['Listing']
+      permissions: [
+        perms('public', ['create'])
+        perms('private', 'all', [airdropsIOOwnerId])
+      ]
+    )
+
+    task = await functor.getNextTask()
+    expect(task).toMatchObject(
+      type: 'SendMessage',
       context:
         person:
           _id: airdropsIOOwnerId

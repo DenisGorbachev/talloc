@@ -5,7 +5,8 @@ const _ = require('lodash');
 const jest_coffeescript_preset = require('jest-preset-coffeescript/jest-preset');
 const jest_mongodb_preset = require('@shelf/jest-mongodb/jest-preset');
 
-module.exports = _.merge({}, jest_coffeescript_preset, jest_mongodb_preset, {
+
+const jest_config = _.merge({}, jest_coffeescript_preset, jest_mongodb_preset, {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
@@ -189,3 +190,5 @@ module.exports = _.merge({}, jest_coffeescript_preset, jest_mongodb_preset, {
   // Whether to use watchman for file crawling
   // watchman: true,
 });
+
+module.exports = jest_config;
