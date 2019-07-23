@@ -160,7 +160,7 @@ describe 'PerformAirdrop', ->
           tags: ['ClaimAirdropApp']
         description: 'https://workflowy.com/#/17112ae471fc'
     )
-    complete(task, db)
+    await complete(task, db)
 
     task = await functor.getNextTask()
     expect(task).toMatchObject(
@@ -169,7 +169,7 @@ describe 'PerformAirdrop', ->
         person:
           _id: airdropsIOOwnerId
     )
-    complete(task, db)
+    await complete(task, db)
     # TODO: add tests for messages
 
   # Jest requires `describe` callback to return undefined
