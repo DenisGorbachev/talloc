@@ -1,10 +1,11 @@
+import util from 'util'
 import _ from 'lodash'
 import moment from 'moment'
 import Joi from '@hapi/joi'
 import Functor from '../Functor'
 #import GetIncomingTransaction from './GetIncomingTransaction'
 import { validateSalesMessage } from '../validators'
-import { toMarkdownList } from '../helpers'
+import { toMarkdownList, IMNetworks } from '../helpers'
 
 ###
   * Outputs
@@ -151,12 +152,14 @@ export default class PerformAirdrop extends Functor
       writerChannels = await @db.Channels.find(
         tags: ['Listing']
         $and: [
-          { permissions: { type: 'public', update: true } }
-          { permissions: { type: 'private', read: true, personIds: { $in: writerPersonIds } } }
+          { permissions: { $elemMatch: { type: 'public', create: true } } }
+          { permissions: { $elemMatch: { type: 'private', read: true, personIds: { $in: writerPersonIds } } } }
         ]
-      )
+      ).toArray()
+#      console.log('@db.Channels.find().toArray()', util.inspect(await @db.Channels.find().toArray(), { showHidden: false, depth: null }));
+#      console.log('writerChannels', writerChannels);
       if !writerChannels.length
-        writer = await @db.Persons.findOne({ _id: { $in: writerPersonIds } }, { sort: { createdAt: 1, _id: 1}})
+        writer = await @db.Persons.findOne({ _id: { $in: writerPersonIds } }, { sort: { createdAt: 1, _id: 1 } })
         # TODO: how to update the task if the channel name changes?
         @add('CreatePrivateChannelWithOwner',
           blueprint: {}
@@ -165,8 +168,11 @@ export default class PerformAirdrop extends Functor
         return
       # TODO: should we message everybody in round-robin fashion?
       # TODO: what if some writers are subscribed to the channels that we've already sent messages through?
+      preferredNetworks = ['Phone'].concat(IMNetworks).concat(['Email', 'ContactForm'])
+      preferredNetworks.reverse() # for correct sorting
+      writerChannels = _.sortBy(writerChannels, (channel) -> preferredNetworks.indexOf(channel.network)).reverse()
       writerChannel = _.first(writerChannels)
-      message = await @db.Messages.find(
+      message = await @db.Messages.findOne(
         channelId: writerChannel._id
       )
       if !message

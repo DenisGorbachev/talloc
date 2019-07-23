@@ -2,7 +2,8 @@ import _ from 'lodash'
 import moment from 'moment'
 import { MongoClient } from 'mongodb'
 import PerformAirdrop from '../lib/Functor/PerformAirdrop'
-import { complete, perms } from '../lib/helpers'
+import { perms } from '../lib/helpers'
+import { complete } from '../lib/test_helpers'
 
 describe 'PerformAirdrop', ->
   connection = null
@@ -143,8 +144,20 @@ describe 'PerformAirdrop', ->
 
     await db.Channels.insertOne(
       uid: 'https://airdrops.io/contact/'
-      network: 'Form'
+      network: 'ContactForm'
       name: 'Airdrops.io contact form'
+      tags: ['Listing']
+      permissions: [
+        perms('public', ['create'])
+        perms('private', 'all', [airdropsIOOwnerId])
+      ]
+    )
+    {
+      insertedId: airdropsIOWriterTelegramId
+    } = await db.Channels.insertOne(
+      uid: 'AirdropsTeam'
+      network: 'Telegram'
+      name: 'Airdrops.io listings Telegram'
       tags: ['Listing']
       permissions: [
         perms('public', ['create'])
@@ -161,26 +174,17 @@ describe 'PerformAirdrop', ->
         perms('private', 'all', [airdropsIOOwnerId])
       ]
     )
-    await db.Channels.insertOne(
-      uid: 'AirdropsTeam'
-      network: 'Telegram'
-      name: 'Airdrops.io listings Telegram'
-      tags: ['Listing']
-      permissions: [
-        perms('public', ['create'])
-        perms('private', 'all', [airdropsIOOwnerId])
-      ]
-    )
 
     task = await functor.getNextTask()
     expect(task).toMatchObject(
       type: 'SendMessage',
       context:
-        person:
-          _id: airdropsIOOwnerId
+        blueprint:
+          channel:
+            _id: airdropsIOWriterTelegramId
     )
     await complete(task, db)
-    # TODO: add tests for messages
+  # TODO: add tests for messages
 
   # Jest requires `describe` callback to return undefined
   return undefined
