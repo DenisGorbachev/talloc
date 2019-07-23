@@ -32,12 +32,12 @@ export default class PerformAirdrop extends Functor
     channels = await @ensureChannels()
     token = await @ensureToken()
     app = await @ensureApp()
-    @addText('Upvote on each airdrop channel that supports it')
-    @addText('Implement account-less upvoting on airdrops.io')
     # TODO: sign agreements with airdrop announcement channels
     # TODO: ping them again if they don't respond
     message = await @buildMessageForAirdropRecipients(project, asset)
     await @sendMessagesToAirdropFeeds(project, asset, amount)
+    @addText('Upvote on each airdrop channel that supports it')
+    @addText('Implement account-less upvoting on airdrops.io')
   calculateAmount: (asset) ->
     # minimum value to get the bounty hunters interested (current range as of 2019-07-21 is 1-10 USD)
     value = 5.0 # USD
@@ -80,7 +80,7 @@ export default class PerformAirdrop extends Functor
     sum = _.sumBy(transactions, (transaction) -> if transaction.isIncoming then transaction.amount else -1 * transaction.amount);
   ensureApp: ->
     # @addText('Evaluate https://gleam.io/ as potential platform')
-    app = await @db.Artefacts.findOne({ tags: { $all: ['Airdrop', 'App'] } })
+    app = await @db.Artefacts.findOne({ tags: { $all: ['ClaimAirdropApp'] } })
     if !app
       @add('CreateArtefact',
         blueprint:
@@ -140,7 +140,7 @@ export default class PerformAirdrop extends Functor
 
       #{motivation}
       """.trim()
-      writerPersonIds = _(channel.permissions).filter({ type: 'private', write: true }).map('personIds').flatten().uniq().value()
+      writerPersonIds = _(channel.permissions).filter({ type: 'private', update: true }).map('personIds').flatten().uniq().value()
       if !writerPersonIds.length
         # TODO: how to update the task if the channel name changes?
         @add('CreateChannelOwner',
@@ -151,16 +151,16 @@ export default class PerformAirdrop extends Functor
       writerChannels = await @db.Channels.find(
         tags: ['Listing']
         $and: [
-          { permissions: { type: 'public', write: true } }
+          { permissions: { type: 'public', update: true } }
           { permissions: { type: 'private', read: true, personIds: { $in: writerPersonIds } } }
         ]
       )
       if !writerChannels.length
-        writers = await @db.Persons.find({ _id: { $in: writerPersonIds } })
+        writer = await @db.Persons.findOne({ _id: { $in: writerPersonIds } }, { sort: { createdAt: 1, _id: 1}})
         # TODO: how to update the task if the channel name changes?
-        @add('CreateChannelWithAnyPerson',
+        @add('CreatePrivateChannelWithOwner',
           blueprint: {}
-          persons: writers
+          person: writer
         )
         return
       # TODO: should we message everybody in round-robin fashion?

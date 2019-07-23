@@ -25,9 +25,13 @@ export step = (functor, taskPattern, executor = null) ->
   if executor
     await executor(task)
   else
-    await execute(task)
+    await complete(task)
 
-export execute = (task, db) ->
+export complete = (task, db) ->
   switch task.type
     when 'CreateArtefact'
-      await db.Artefacts.insertOne(task.blueprint)
+      result = await db.Artefacts.insertOne(task.context.blueprint)
+      result.insertedId
+    when 'CreateChannelOwner'
+      result = await db.Persons.insertOne(task.context.blueprint)
+      result.insertedId

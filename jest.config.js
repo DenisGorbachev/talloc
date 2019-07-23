@@ -182,9 +182,9 @@ module.exports = _.merge({}, jest_coffeescript_preset, jest_mongodb_preset, {
   // verbose: null,
 
   // An array of regexp patterns that are matched against all source file paths before re-running tests in watch mode
-  //   "watchPathIgnorePatterns": [
-  //     "<rootDir>/node_modules",
-  //   ]
+  "watchPathIgnorePatterns": [
+    "<rootDir>/node_modules",
+  ]
 
   // Whether to use watchman for file crawling
   // watchman: true,

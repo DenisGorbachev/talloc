@@ -2,7 +2,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { MongoClient } from 'mongodb'
 import PerformAirdrop from '../lib/Functor/PerformAirdrop'
-import { step, perms } from '../lib/helpers'
+import { complete, perms } from '../lib/helpers'
 
 describe 'PerformAirdrop', ->
   connection = null
@@ -62,7 +62,9 @@ describe 'PerformAirdrop', ->
     } = await db.Persons.insertOne(
       name: ''
     )
-    await db.Channels.insertOne(
+    {
+      insertedId: airdropsIOId
+    } = await db.Channels.insertOne(
       uid: 'airdrops.io'
       network: 'Internet'
       name: 'Airdrops.io'
@@ -158,6 +160,16 @@ describe 'PerformAirdrop', ->
           tags: ['ClaimAirdropApp']
         description: 'https://workflowy.com/#/17112ae471fc'
     )
+    complete(task, db)
+
+    task = await functor.getNextTask()
+    expect(task).toMatchObject(
+      type: 'CreatePrivateChannelWithOwner',
+      context:
+        person:
+          _id: airdropsIOOwnerId
+    )
+    complete(task, db)
     # TODO: add tests for messages
 
   # Jest requires `describe` callback to return undefined
