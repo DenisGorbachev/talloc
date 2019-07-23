@@ -2,7 +2,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { MongoClient } from 'mongodb'
 import PerformAirdrop from '../lib/Functor/PerformAirdrop'
-import { perms } from '../lib/helpers'
+import { step, perms } from '../lib/helpers'
 
 describe 'PerformAirdrop', ->
   connection = null
@@ -103,15 +103,14 @@ describe 'PerformAirdrop', ->
         perms('private', 'all', [airdropsIOOwnerId])
       ]
     )
-    await functor.reexecute()
-    expect(_.first(functor.tasks)).toMatchObject(
+
+    task = await functor.getNextTask()
+    expect(task).toMatchObject(
       type: 'CreateChannel',
       context:
         blueprint:
           network: 'Twitter'
           tags: ['BTCV']
-      priority: 10,
-      genome: []
     )
     channelIds = []
     for task in functor.tasks when task.type is 'CreateChannel'
@@ -120,8 +119,9 @@ describe 'PerformAirdrop', ->
       , task.context.blueprint))
       expect(result).toMatchObject({ insertedId: expect.any(Object) })
       channelIds.push(result.insertedId)
-    await functor.reexecute()
-    expect(_.first(functor.tasks)).toMatchObject(
+
+    task = await functor.getNextTask()
+    expect(task).toMatchObject(
       type: 'DecorateChannel',
       context:
         channel: expect.objectContaining({
@@ -131,14 +131,13 @@ describe 'PerformAirdrop', ->
       genome: []
     )
     await db.Channels.updateMany({ _id: { $in: channelIds } }, { $set: { isDecorated: true } })
-    await functor.reexecute()
-    expect(_.first(functor.tasks)).toMatchObject(
+
+    task = await functor.getNextTask()
+    expect(task).toMatchObject(
       type: 'SendMessage',
       context:
         blueprint:
           channelId: expect.any(Object)
-      priority: 10,
-      genome: []
     )
     for channelId in channelIds
       messages =
@@ -150,12 +149,14 @@ describe 'PerformAirdrop', ->
             context: {}
           }
       await db.Messages.insertMany(messages)
-    await functor.reexecute()
-    expect(_.first(functor.tasks)).toMatchObject(
+
+    task = await functor.getNextTask()
+    expect(task).toMatchObject(
       type: 'CreateArtefact',
-      context: { description: 'https://workflowy.com/#/17112ae471fc' },
-      priority: 10,
-      genome: []
+      context:
+        blueprint:
+          tags: ['ClaimAirdropApp']
+        description: 'https://workflowy.com/#/17112ae471fc'
     )
     # TODO: add tests for messages
 

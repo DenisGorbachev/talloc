@@ -53,7 +53,11 @@ export default class Functor
     throw new Error("Implement me")
   reexecute: ->
     @tasks = []
-    @execute()
+    await @execute()
+  getNextTask: ->
+    @tasks = []
+    await @execute()
+    _.first(@tasks)
   requestToBlueprint: (query, options) ->
     blueprint = {}
     for key, value of query

@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import Joi from '@hapi/joi'
 
 export joi = Joi.defaults((schema) -> schema.required())
@@ -14,3 +15,19 @@ export perms = (type, truePermissions, personIds = []) ->
   for permission in ['create', 'read', 'update', 'delete']
     permissions[permission] = permission in truePermissions or truePermissions is true or truePermissions is 'all'
   permissions
+
+### Test helpers ###
+
+export step = (functor, taskPattern, executor = null) ->
+  await functor.reexecute()
+  task = _.first(functor.tasks)
+  expect(task).toMatchObject(_.defaults(taskPattern, { priority: 10, genome: [] }))
+  if executor
+    await executor(task)
+  else
+    await execute(task)
+
+export execute = (task, db) ->
+  switch task.type
+    when 'CreateArtefact'
+      await db.Artefacts.insertOne(task.blueprint)

@@ -85,7 +85,7 @@ export default class PerformAirdrop extends Functor
       @add('CreateArtefact',
         blueprint:
           name: 'Airdrop application',
-          tags: []
+          tags: ['ClaimAirdropApp']
         description: 'https://workflowy.com/#/17112ae471fc'
       )
   buildMessageForAirdropRecipients: (project, asset) ->
