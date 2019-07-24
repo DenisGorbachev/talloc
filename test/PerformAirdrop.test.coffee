@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import moment from 'moment'
 import { MongoClient } from 'mongodb'
-import PerformAirdrop from '../lib/Functor/PerformAirdrop'
-import { perms } from '../lib/helpers'
-import { complete } from '../lib/test_helpers'
+import PerformAirdrop from '../src/Functor/PerformAirdrop'
+import { perms } from '../src/helpers'
+import { complete } from '../src/test_helpers'
 
 describe 'PerformAirdrop', ->
   connection = null
