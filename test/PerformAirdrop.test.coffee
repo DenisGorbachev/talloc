@@ -35,6 +35,14 @@ describe 'PerformAirdrop', ->
       to: new Date('2019-07-31'),
       referralLimit: 100,
     }, { db })
+    {
+      insertedId: aliceId
+    } = await db.Users.insertOne(
+      emails: [
+        { address: 'alice@example.com', verified: true }
+      ]
+    )
+    alice = await db.Users.findOne({ _id: aliceId })
     await db.Projects.insertOne(
       uid: 'BTCV',
       url: 'https://btcv.volatility-tokens.com/',
@@ -77,7 +85,7 @@ describe 'PerformAirdrop', ->
       ]
     )
 
-    task = await functor.getNextTask()
+    task = await functor.getNextTask(alice)
     expect(task).toMatchObject(
       type: 'CreateChannel',
       context:
@@ -93,7 +101,7 @@ describe 'PerformAirdrop', ->
       expect(result).toMatchObject({ insertedId: expect.any(Object) })
       channelIds.push(result.insertedId)
 
-    task = await functor.getNextTask()
+    task = await functor.getNextTask(alice)
     expect(task).toMatchObject(
       type: 'DecorateChannel',
       context:
@@ -105,7 +113,7 @@ describe 'PerformAirdrop', ->
     )
     await db.Channels.updateMany({ _id: { $in: channelIds } }, { $set: { isDecorated: true } })
 
-    task = await functor.getNextTask()
+    task = await functor.getNextTask(alice)
     expect(task).toMatchObject(
       type: 'SendMessage',
       context:
@@ -123,7 +131,7 @@ describe 'PerformAirdrop', ->
           }
       await db.Messages.insertMany(messages)
 
-    task = await functor.getNextTask()
+    task = await functor.getNextTask(alice)
     expect(task).toMatchObject(
       type: 'CreateArtefact',
       context:
@@ -133,7 +141,7 @@ describe 'PerformAirdrop', ->
     )
     await complete(task, db)
 
-    task = await functor.getNextTask()
+    task = await functor.getNextTask(alice)
     expect(task).toMatchObject(
       type: 'CreatePrivateChannelWithOwner',
       context:
@@ -175,7 +183,7 @@ describe 'PerformAirdrop', ->
       ]
     )
 
-    task = await functor.getNextTask()
+    task = await functor.getNextTask(alice)
     expect(task).toMatchObject(
       type: 'SendMessage',
       context:

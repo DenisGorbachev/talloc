@@ -54,7 +54,7 @@ export default class Functor
   reexecute: ->
     @tasks = []
     await @execute()
-  getNextTask: ->
+  getNextTask: (user) ->
     @tasks = []
     await @execute()
     _.first(@tasks)
