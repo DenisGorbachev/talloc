@@ -94,12 +94,13 @@ describe 'PerformAirdrop', ->
           tags: ['BTCV']
     )
     channelIds = []
-    for task in functor.tasks when task.type is 'CreateChannel'
+    while task and task.type is 'CreateChannel'
       result = await db.Channels.insertOne(Object.assign(
         name: "#{task.context.blueprint.tags[0]} #{task.context.blueprint.network} channel"
       , task.context.blueprint))
       expect(result).toMatchObject({ insertedId: expect.any(Object) })
       channelIds.push(result.insertedId)
+      task = await functor.getNextTask(alice)
 
     task = await functor.getNextTask(alice)
     expect(task).toMatchObject(

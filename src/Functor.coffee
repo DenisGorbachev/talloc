@@ -8,8 +8,9 @@ export default class Functor
     @tasks = []
   add: (type, context, priority = 10) ->
     task = { type, context, priority, genome: [] }
-    @tasks.push(task)
-    task
+    throw task
+#    @tasks.push(task)
+#    task
   addText: (text, context, priority = 100) ->
     @add('Execute', Object.assign({ text }, context), priority)
   assign: (genome) ->
@@ -55,9 +56,20 @@ export default class Functor
     @tasks = []
     await @execute()
   getNextTask: (user) ->
-    @tasks = []
-    await @execute()
-    _.first(@tasks)
+    # Alternatively, refactor `throw` into `yield` (but that would complicate the logic of running the generator for multiple users)
+#    @tasks = []
+    try
+      await @execute()
+    catch e
+      if e.type && e.context
+        # task
+        return e
+      else
+        # error
+        throw e
+    # no task for user
+    return undefined
+#    _.first(@tasks)
   requestToBlueprint: (query, options) ->
     blueprint = {}
     for key, value of query
