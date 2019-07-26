@@ -25,7 +25,9 @@ describe 'PerformAirdrop', ->
     await connection.close()
     await db.close()
 
-  it 'should return the task for denis.d.gorbachev@gmail.com', ->
+  it 'should return the task', ->
+    deps = { db, now: new Date('2019-07-26T00:00:00Z') }
+
     functor = new PerformAirdrop({
       projectUid: 'BTCV',
       networks: ['Twitter', 'Facebook', 'Telegram', 'Discord']
@@ -34,7 +36,7 @@ describe 'PerformAirdrop', ->
       from: new Date('2019-07-22'),
       to: new Date('2019-07-31'),
       referralLimit: 100,
-    }, { db })
+    }, deps)
     {
       insertedId: aliceId
     } = await db.Users.insertOne(
@@ -110,7 +112,6 @@ describe 'PerformAirdrop', ->
           tags: ['BTCV']
         })
       priority: 10,
-      genome: []
     )
     await db.Channels.updateMany({ _id: { $in: channelIds } }, { $set: { isDecorated: true } })
 
@@ -140,7 +141,7 @@ describe 'PerformAirdrop', ->
           tags: ['ClaimAirdropApp']
         description: 'https://workflowy.com/#/17112ae471fc'
     )
-    await complete(task, db)
+    await complete(task, deps)
 
     task = await functor.getNextTask(alice)
     expect(task).toMatchObject(
@@ -149,7 +150,7 @@ describe 'PerformAirdrop', ->
         person:
           _id: airdropsIOOwnerId
     )
-    await complete(task, db)
+    await complete(task, deps)
 
     await db.Channels.insertOne(
       uid: 'https://airdrops.io/contact/'
@@ -192,7 +193,7 @@ describe 'PerformAirdrop', ->
           channel:
             _id: airdropsIOWriterTelegramId
     )
-    await complete(task, db)
+    await complete(task, deps)
   # TODO: add tests for messages
 
   # Jest requires `describe` callback to return undefined

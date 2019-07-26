@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment'
 import Joi from '@hapi/joi'
 
 export default class Functor
@@ -7,15 +8,12 @@ export default class Functor
     _.extend(@, Joi.attempt(deps, Joi.object()))
     @tasks = []
   add: (type, context, priority = 10) ->
-    task = { type, context, priority, genome: [] }
+    task = { type, context, priority }
     throw task
 #    @tasks.push(task)
 #    task
   addText: (text, context, priority = 100) ->
     @add('Execute', Object.assign({ text }, context), priority)
-  assign: (genome) ->
-    for task in @tasks
-      task.genome = task.genome.concat(genome)
   getOne: (collection, query, options = {}) ->
     results = @get(collection, query, Object.assign(options, { limit: 1 }))
     results[0]
@@ -59,7 +57,7 @@ export default class Functor
     # Alternatively, refactor `throw` into `yield` (but that would complicate the logic of running the generator for multiple users)
 #    @tasks = []
     try
-      await @execute()
+      await @execute(user)
     catch e
       if e.type && e.context
         # task
@@ -70,6 +68,8 @@ export default class Functor
     # no task for user
     return undefined
 #    _.first(@tasks)
+  moment: ->
+    moment(@now || new Date())
   requestToBlueprint: (query, options) ->
     blueprint = {}
     for key, value of query

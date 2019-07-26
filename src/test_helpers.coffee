@@ -1,4 +1,6 @@
-export complete = (task, db) ->
+import _ from 'lodash'
+
+export complete = (task, { db, now }) ->
   switch task.type
     when 'CreateArtefact'
       result = await db.Artefacts.insertOne(task.context.blueprint)
@@ -11,6 +13,9 @@ export complete = (task, db) ->
       result.insertedId
     when 'SendMessage'
       result = await db.Messages.insertOne(task.context.blueprint)
+      result.insertedId
+    when 'CreateAct'
+      result = await db.Acts.insertOne(_.defaults(task.context.blueprint, { updatedAt: now, createdAt: now }))
       result.insertedId
     else
       throw new Error("Can't complete #{task.type} task")
