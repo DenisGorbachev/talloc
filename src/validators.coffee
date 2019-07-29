@@ -51,5 +51,7 @@ export validateSalesMessage = (information, motivation, fears, assurances, guide
   Fears losing freedom
     Fears losing ability to move
     Fears losing ability to make decisions
+  Fears losing privacy
+    Fears providing contacts to spammers
 ###
 export fearRegExp = new RegExp('^Fears losing.*\\((?:health|wealth|status|time|freedom)\\)$', 'g')
