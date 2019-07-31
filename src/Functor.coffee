@@ -6,6 +6,7 @@ export default class Functor
   constructor: (opts, deps) ->
     _.extend(@, Joi.attempt(opts, Joi.object()))
     _.extend(@, Joi.attempt(deps, Joi.object()))
+    @now ?= new Date()
     @tasks = []
   add: (type, context, priority = 10) ->
     task = { type, context, priority }
