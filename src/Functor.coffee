@@ -10,7 +10,7 @@ export default class Functor
     @tasks = []
   add: (type, context, priority = 10) ->
     task = { type, context, priority }
-    throw task
+#    throw task
 #    @tasks.push(task)
 #    task
   addText: (text, context, priority = 100) ->
